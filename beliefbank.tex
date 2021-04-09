@@ -114,6 +114,25 @@ This is significant as it is a first step towards endowing models with an evolvi
 persistent memory, and creating systems that continuously improve over time.
 \end{abstract}
 
+
+\red{Why experiments are slow:
+\begin{itemize}
+    \item calibration is a problem!!! When I extended the dataset the calibration seems to not work well. I changed it to a heurisitc alternative which seems to work but that mean I have to rerun all SAT solving experiments
+    \item SAT solving takes per entity: 
+    \item each run of the full graph takes > 1h
+    \item + 10 plants: 10 h
+    \item + 20 incremental with random context: 20
+    \item + 20 incremental with bm25 context: 20
+\end{itemize}}
+
+\red{What are the current issues:
+\begin{itemize}
+    \item If calibration is of F1 can still improve but it flips essential things from no-->yes and random things from yes-->no
+    \item What kind of F1 should I report? Derivable facts (small test set but large improvements), gold facts (even smaller test set with good model performance and only small improvements, all IsA facts (might include a couple of wrong labels, large test set, only slight improvements as many nodes need more mututal exclusive connectivity)
+    \item I have to filter plurals
+    \item BM25 vs random retrieval: random seems to be better than BM25???
+\end{itemize}}
+
 \section{Introduction}
 
 % \vspace{-1mm}
@@ -336,11 +355,11 @@ accuracy or (b) the improvement over time aspect: Given answers to questions
 \centering
 {\small
 \begin{tabular}{|l|ll||ll||ll||ll|} \hline
-& \multicolumn{2}{|c|}{\bf batch1} &
+Results after seeing: & \multicolumn{2}{|c|}{\bf batch1} &
 \multicolumn{2}{|c|}{then {\bf batch2}} &
 \multicolumn{2}{|c|}{then {\bf batch3}} &
 \multicolumn{2}{|c|}{then {\bf batch4}} \\
-& Con & Acc & Con & Acc & Con & Acc & Con & Acc \\ \hline           
+Consistency/Accuracy: & Con & Acc & Con & Acc & Con & Acc & Con & Acc \\ \hline           
 model (raw) & & & & & & & & \\
 model + constraints & & & & & & & & \\
 model + feedback & & & & & & & & \\
@@ -411,7 +430,7 @@ We use Z3 which does weighted SAT, etc.
 
 \subsection{Calibration \label{calibration}}
 
-We calibrate turked scores by sigmoid-scaling. We perform a grid search over slop and shift.
+We calibrate turked scores by sigmoid-scaling. We perform a grid search over slope and shift.
 
 \section{Experiments}
 
@@ -472,6 +491,12 @@ We evaluate three policies for selecting relevant beliefs for a new question:
 \item[(d)] The top 10 {\it most confident beliefs} independent of if they have been corrected or not.
 \end{des}
 
+Baselines:
+\begin{des}
+\item[(a)] 4 random beliefs of the model without SAT (running)
+\item[(b)] The top 4 beliefs most similar to the question, as identified by BM25 (information retrieval) without SAT (running)
+\item[(c)] 4 random beliefs of the belief bank after SAT.
+\end{des}
 % Given the new answer, we run the constraint solver as usual. We are interested in whether
 % an improved model (using one of these policies) + constraint solver will outperform a fixed
 %  model + constraint solver.
