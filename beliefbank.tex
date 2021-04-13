@@ -27,7 +27,7 @@
 
 % PEC additions
 \usepackage{graphicx}
-
+\newcommand{\nk}[1]{\textcolor{green}{Nora: #1}}
 \newcommand{\eat}[1]{}
 \newcommand{\red}[1]{\textcolor{red}{#1}}
 \newcommand{\blue}[1]{\textcolor{blue}{#1}}
@@ -94,18 +94,26 @@ Seattle, WA \\
 \begin{document}
 \maketitle
 \begin{abstract}
-Although language models (LMs) have become adept at question-answering (QA), they
+\nk{Regarding the title: I liked the Believe me...}
+Although language models (LMs) \nk{Should we call it pre-trained LM and refer to it as PLMs?} have become adept at question-answering (QA), they
 still can produce inconsistent answers, 
 % Below - need to acknowledge there's already work on consistency reduction
 even after using specialized training techniques to reduce model inconsistency. As a result, it can be hard to identify
 % making it hard to identify  - old version
 what the model actually
 "believes" about the world. Our goal is to reduce this problem, so LMs are 
-more globally consistent in their answers. Our approach is to add a memory
-component - a BeliefBank - that records a model's raw answers and improves
-consistency among them by flipping answers that significantly clash with others.
-We show that, in a controlled experimental setting where facts are simple
-propositions (e.g., "eagles are birds"), both accuracy and consistency
+more globally consistent and accurate in their answers. Our approach is to add a memory
+component - a BeliefBank - that records a model's raw 
+% answers and improves consistency among them by flipping answers that significantly clash with others.
+% NEW
+answers; and a reasoning
+component - a weighted SAT solver - that improves consistency among beliefs by
+flipping answers that significantly clash with others. Thus, the overall system
+constructs a more coherent picture of the world from the model's raw answers.
+% -- end NEW 
+We show that, in a controlled experimental setting, 
+% where facts are simple propositions (e.g., "eagles are birds"), 
+both accuracy and consistency
 is improved. We also show that, by recalling pertinent beliefs from the
 BeliefBank as context for new questions, raw answer accuracy for those unseen
 questions is also improved. This feeds more accurate answers back into the growing
@@ -114,24 +122,27 @@ This is significant as it is a first step towards endowing models with an evolvi
 persistent memory, and creating systems that continuously improve over time.
 \end{abstract}
 
-
+\eat{
 \red{Why experiments are slow:
 \begin{itemize}
-    \item calibration is a problem!!! When I extended the dataset the calibration seems to not work well. I changed it to a heurisitc alternative which seems to work but that mean I have to rerun all SAT solving experiments
-    \item SAT solving takes per entity: 
+    \item calibration is a problem!!! When I extended the dataset the calibration seems to not work well. I changed it to a heuristic alternative which seems to work but that means I have to rerun all SAT solving experiments
+    \item SAT solving takes per entity: 6 min
     \item each run of the full graph takes > 1h
     \item + 10 plants: 10 h
     \item + 20 incremental with random context: 20
     \item + 20 incremental with bm25 context: 20
+    \item + 20 incremental with bm25 SAT solved context: 20
+    \item + averaging over multiple splits maybe 5?: 20*4
 \end{itemize}}
 
 \red{What are the current issues:
 \begin{itemize}
     \item If calibration is of F1 can still improve but it flips essential things from no-->yes and random things from yes-->no
-    \item What kind of F1 should I report? Derivable facts (small test set but large improvements), gold facts (even smaller test set with good model performance and only small improvements, all IsA facts (might include a couple of wrong labels, large test set, only slight improvements as many nodes need more mututal exclusive connectivity)
+    \item What kind of F1 should I report? Derivable facts (small test set but large improvements), gold facts (even smaller test set with good model performance and only small improvements, all IsA facts (might include a couple of wrong labels, large test set, only slight improvements as many nodes need more mutual exclusive connectivity)
     \item I have to filter plurals
-    \item BM25 vs random retrieval: random seems to be better than BM25???
+    \item Do we expect the model to understand negation inside to context window?
 \end{itemize}}
+}
 
 \section{Introduction}
 
@@ -154,19 +165,26 @@ system improves with time. \label{architecture}}
 \end{figure}
 
 How might we ascribe a notion of belief to a model? Prior work has shown that, while
-models have high question-answering (QA) accuracy, they can also be inconsistent in their
+models have high question-answering (QA) accuracy \nk{should we specify that we are talking about “closed-book question answering” and refer to papers that show that PLMs are good at it? }, they can also be inconsistent in their
 answers, making it hard to pin down what a model actually ``believes'' about a proposition.
 Our goal is to reduce this problem by having systems provide more globally consistent
 answers to questions.
 
 Prior work on reducing inconsistency has focused on retraining the model itself to be
-more consistent, e.g., \cite{Ribeiro2019AreRR,Li2019ALF}, but with imperfect results. We present an
+more consistent in its answers, e.g., \cite{Ribeiro2019AreRR,Li2019ALF}, but with imperfect results. We present an
 alternative approach in which the model is unchanged, but an evolving, persistent memory
-of beliefs - called the BeliefBank - is layered on top, and can be used
-to reduce inconsistency of the overall system (model + BeliefBank). Further,
-we show how beliefs from the BeliefBank can be used as additional model
-input for new questions, resulting in improved model answer accuracy,
-and hence more accurate new beliefs for the BeliefBank. This allows the
+of beliefs - called the BeliefBank - is layered on top, and a reasoning component - a
+weighted SAT solver - is used to improve consistency among beliefs. 
+Thus, the overall system attempts to build a more coherent representation of the
+world from the model's raw answers, by ruminating on the answers seen so far.
+This can be viewed as assembling a simple ``mental model'' of the world from
+the noisy output of a raw LM. 
+
+Just as the model helps populate the BeliefBank, we also show how beliefs in
+the BeliefBank can improve the model's answers to future questions,
+by using the most relevant beliefs as additional context for question-answering
+(i.e., reminding the model of important facts pertinent to the new question).
+These improved answers then feed into the growing BeliefBank, allowing the
 overall system (model + BeliefBank) to continuously improve performance over
 time, without retraining the model itself.
 
@@ -175,6 +193,7 @@ both candidate facts and candidate constraints are provided. Candidate facts are
 sentences that may be true or false, e.g., "An eagle is a bird" (T), ``An eagle is a mammal'' (F). Candidate constraints are between (variabilized) facts, e.g., ``?X is a bird $\rightarrow$ ?X can fly''. These allow us both to probe and measure improvement
 in the system's consistency and accuracy, described shortly.
 
+\eat{
 \red{Delete/reword this paragraph} Our approach involves an interplay between a model's raw answers, and an
 evolving memory - the BeliefBank - of beliefs based on the model's earlier answers
 and a set of constraints that should hold. Model's answers contribute to the BeliefBank,
@@ -183,6 +202,7 @@ the model. In between, a constraint system serves to identify and reduce inconsi
 among beliefs in the BeliefBank. Combined, this results in a system capable of
 continuous improvement over time, opening new possibilities for dialog and
 interactive teaching.
+}
 
 \red{List contributions}
 
@@ -203,8 +223,8 @@ answers that violate them \cite{Tandon2018ReasoningAA,Du2019BeCI}. This
 encourages consistency within a single answer structure, but not among
 different answers, our goal here.
 
-Concerning improving global consistency using constraints,
-in the area of knowledge graph construction
+% Concerning improving global consistency using constraints,
+In the area of knowledge graph construction
 % , where individual extractions may be noisy, 
 \citet{Pujara2013KnowledgeGI} define ``knowledge graph identification''
 as the task of building a maximally consistent knowledge graph given noisy facts
@@ -215,15 +235,25 @@ Similarly \citet{berant2010global} learn the globally
 optimal set of entailments between a large database of candidate
 entailment pairs (with associated confidences), by applying
 a global transitivity constraint (X$\vdash$Y \& Y$\vdash$Z $\rightarrow$ X$\vdash$Z)
-with Integer Logic Programming. Our constraint solver performs an analogous
+using Integer Logic Programming. 
+Our constraint solver performs an analogous
 function in our architecture, using the Z3 SAT solver (Section~\ref{??}).
+\red{Say how we are different/go beyond.}
 
-While there are neural architectures that include an associated dynamic memory,
+An important part of our contribution is the use of a dynamic, persistent memory.
+While there are neural architectures that include an associated memory,
 e.g., \cite{Henaff2017TrackingTW,Sukhbaatar2015EndToEndMN}, these components
 typically play the role of a short-term working memory to help computation.
 In contrast, our BeliefBank memory layer is a persistent, long-term memory of
 explicit beliefs.
 
+
+\nk{some more related work to add:
+Prior work analyzing knowledge captured by pre-trained LMs 
+add: inconsistency with respect to knowledge captured by pre-trained LMs paraphrases, grammatical number and negation \cite{Elazar2021MeasuringAI, ravichander-etal-2020-systematicity, ettinger-2020-bert, kassner-schutze-2020-negated}. 
+2 more inconsistency papers: \citet{Camburu2020MakeUY}
+\citep{du2019consistent}
+}
 % \red{Possibly cite \cite{Graves2016HybridCU} - the memory there is more like
 % an opaque expansion of the original network. I'm inclined not to cite this though
 % as it's old and not really relevant.}
@@ -232,17 +262,6 @@ explicit beliefs.
 \subsection{Faithfulness}
 \citet{subramanian-etal-2020-obtaining}
 introduce the concept of module-wise faithfulness, a systematic evaluation of faithfulness in neural module networks for reasoning. We show that naive training does not produce faithful modules and propose several techniques to improve module-wise faithfulness. 
-
-\eat{Work on \textbf{consistency in other domains}
-includes \citep{du2019consistent} where  prediction
-consistency in procedural text is improved. \citet{ribeiro-etal-2020-beyond} use consistency for more robust evaluation. \citet{li-etal-2019-logic} measure and mitigate inconsistency in natural language inference (NLI), and finally, \citet{camburu2020make} propose a method for measuring inconsistencies in NLI explanations \cite{camburu2018snli}.}
-
-\eat{
-\subsection{PLMs and KGs}
-\subsection{Knowledge Graph Identification}
-\citet{Pujara2013KnowledgeGI}
-use probabilistic soft logic (PSL) \cite{Broecheler2010ProbabilisticSL}.
-}
 
 \subsection{Inconsistencies in KGs}
 (copied from old paper, need rewrite)
@@ -260,7 +279,7 @@ inconsistent and detects inconsistent statements
 
 
 
-\section{Problem Definition}
+\section{Task}
 
 \subsection{Beliefs}
 
@@ -281,93 +300,117 @@ Thus, to the external observer, there are {\it degrees} to which a system acts a
 believes something.
 % (Note this is distinct from a system's internal confidence in a belief).
 
-% As has been shown elsewhere, language models (LM) can be inconsistent in their answers,
-% suggesting they have a rather weak notion of belief, in the sense described above.
-% To strengthen this, we add a dynamic memory component - the BeliefBank - on top of
-% the model, to track and modify beliefs. We use the phrase ``the {\bf system}'' to refer
-% to the combined model plus belief bank. Our goal is to create a system with
-% stronger and more accurate notion of belief than the underlying LM inside it.
-
-\subsection{Definitions \label{definitions}}
-
-We first define the notion of a belief, a BeliefBank, a constraint network,
-
-
-
-\begin{ite}
- \item a {\bf belief} $b_i$ = a triple ($s_i$,$b_i$,$c_i$), where
-    \begin{ite}
-     \item $s_i$ is a sentence expressing a proposition about the world
-     \item $b_i \in$ \{T,F\} denotes the system's belief about the truth of $s_i$
-     \item $c_i$ is a number 0-1 representing the system's confidence in that belief
-    \end{ite}
- \item a {\bf BeliefBank} $B(S)$ = a set of beliefs over sentences $S$ = $s_1,...,s_n$
- \item For notational convenience, we denote the believed truth $b_i$ of $s_i$ according to $B(S)$ as $bel(s_i,B(S))$
- \item a soft {\bf constraint} $c_i$ = a triple of the form ($if_i \rightarrow then_i, p_i$),
-   where $if_i, then_i$ are sentences in $S$. The constraint denotes
-   that if $if_i$ is (believed) true, then $then_i$ should be also, with
-   penalty $p_i$ if it is not.
- \item A {\bf constraint network} $C(S)$ = a set of constraints $c_i$ over sentences $S$.
-\end{ite}
-For notational convenience we drop the S parameter.
-
-Given a set of beliefs $B$ and a constraint network $C$, we define the {\it consistency}
-of those beliefs as (the negative of) the total penalty of violated constraints.
- \begin{myquote}
-  consistency(B,C) = \\
-\hspace*{2mm}  $- \sum_{c_i \in C} \{~ p_i ~ | ~ c_i = (if_i \rightarrow then_i, p_i )       ~\& \\
-\hspace*{18mm}  bel(if_i,B) ~ \& ~ NOT~bel(then_i,B)~ \}$
-\end{myquote}
-Although this measure is dependent on the constraints and penalties used,
-it allows us to perform {\it comparative} experiments with different systems.
-We also measure the {\it accuracy} of the beliefs $B$ by comparing them
-with their gold truths (if known).
+\eat{
+\red{Possibly delete this paragraph if too repetitive.} 
+As has been shown elsewhere, language models (LM) can be inconsistent in their answers,
+suggesting they have a rather weak notion of belief, in the sense described above.
+To strengthen this, we add a dynamic memory component - the BeliefBank - on top of
+the model to track and modify beliefs. We use the phrase ``the {\bf system}'' to refer
+to the combined model plus belief bank. Our goal is to create a system with
+a stronger notion of belief (i.e., more consistent and accurate) than the underlying LM inside it.
+}
 
 \subsection{Task Definition}
 
-Formally specify the goal here!
+Our goal is to ascribe a stronger notion of ``belief'' to a system that includes a model $M$,
+by improving the consistency and accuracy of its answers (compared with $M$). To measure
+this we consider a true/false QA task, where we are also given a set of
+constraints between answers:
+\begin{myquote}
+{\bf Given:}
+\begin{ite}
+\item a set of {\bf sentences} $S$ 
+\item a set of {\bf constraints} $C(S)$ between (the truth values of) sentences in $S$, each annotated with a penalty $p_i$ to apply if $c_i$ is violated
+\item a {\bf model} $M$ that takes as input a True/False (NL) question $Q$ and (NL) context $X$, and predicts a True/False answer $A$ with confidence score $F$
+\end{ite}
+{\bf Predict:}
+\begin{ite}
+\item the True/False labels for $S$, so as to maximally improve accuracy (with respect to gold labels) and
+   consistency (minimize total penalties of constraint violations) compared with model $M$'s raw answers
+\end{ite}
+\end{myquote}
+As our dataset class distribution (described shortly) is unbalanced, with significantly fewer True than False
+answers, we measure accuracy using F1 (over True questions) to avoid scores being dominated by negative
+answers.
 
+
+
+\section{Approach}
+
+Our goal is to ascribe a stronger notion of ``belief'' to a model,
+by improving the consistency and accuracy of its answers. Our approach is to add a
+memory layer, called the {\bf BeliefBank}, on top of the model to track and modify
+beliefs. We evaluate two methods for leveraging the BeliefBank:
 \begin{des}
-\item[{\bf Given:}] a noisy model, constraints, and a stream of T/F questions
-\item[{\bf Maximize:}] both the consistency and accuracy of the system's answers
+\item[{\bf Constraint solving:}] Given a model $M$'s answers (with confidences) in the BeliefBank, a constraint
+solver seeks to reduce constraint violations by potentially flipping answers that maximally clash
+with other answers. The answers in the revised BeliefBank are taken as the system's {\it overall} answers
+to questions.
+\item[{\bf Feedback:}] Given a new question $q_{n}$, relevant beliefs in the BeliefBank are
+provided as additional input (namely as context) to help it answer $q_{n}$,
+to see if this improves the model's answer.
 \end{des}
-? This doesn't sound quite right. Do we emphasize (a) improved consistency and
-accuracy or (b) the improvement over time aspect: Given answers to questions
-1 to n, improve your answer to question n+1. 
+Figure~\ref{architecture} illustrates this architecture.
 
+\subsection{Definitions \label{definitions}}
 
-% Let M be a question-answering model that takes as input a context D and question Q,
-% and produces an answer A with confidence R.
-% Let System be a function f(M,B(S)) 
-
-% We define a constraint network ...
-
-% As a starting point, let us take the model's direct answers to be its beliefs.
-% Table 1 measures its consistency and accuracy wrt. the constraint network and
-% asilver truths, respectively.
-
-% We can now pass these beliefs through a weighted constraint solver that
-% seeks to minim
-% of those beliefs as the average penalty 
-
+\noindent Let
+\vspace{-2mm}
+\begin{ite}
+ \item a {\bf belief} $b_i$ = a triple ($s_i$,$b_i$,$c_i$), where
+    \begin{ite}
+     \item $s_i$ is a sentence $\in S$ % expressing a proposition about the world
+     \nk{we should not call the belief and the truth of $s_i$ both $b_i$}
+     \item $b_i \in$ \{T,F\} denotes the system's belief about the truth of $s_i$
+     \item $w_i$ is a number 0-1 representing the system's confidence in that belief
+    \end{ite}
+ \item a {\bf BeliefBank} $B(S)$ = a set of beliefs over sentences $S$ = $s_1,...,s_n$
+ \item For notational convenience, we denote the believed truth $b_i$ of $s_i$ according to $B(S)$ as $bel(s_i,B(S))$
+ \item a {\bf constraint} $c_i$ = a 4-tuple of the form
+\begin{myquote} \centering
+($if_i \rightarrow then_i, tf_i, p_i$)
+\nk{It took me some time to see what is going on here. I think it is comfunsing to call it $if_i$. On first glance it does not read as if but as an index i then f and then again index i...}
+\end{myquote} 
+where $if_i, then_i$ are sentences, e.g., \\
+\vspace{1mm}
+\hspace*{1mm} ``A poodle is a dog'' $\rightarrow$ ``A poodle has a tail'' \\
+\vspace{1mm} 
+and $tf_i \in$ \{True,False\} denotes, if $if_i$ is true, the expected truth of $then_i$ (here, True),
+with penalty $p_i$ if it is not.
+\item A {\bf constraint graph} $C(S)$ = a set of constraints $c_i$ over sentences $S$
+\end{ite}
+Given a set of beliefs $B(S)$ about $S$ and a set of constraints $C(S)$, we define the {\it consistency}
+of those beliefs as (the negative of) the total penalty of violated constraints.
+Dropping the $S$ parameter for convenience:
+ \begin{myquote}
+  consistency(B,C) = \\
+\hspace*{2mm}  $- \sum_{c_i \in C} \{~ p_i ~ | ~ c_i = (if_i \rightarrow then_i, tf_i, p_i )       ~\& \\
+\hspace*{18mm}  bel(if_i,B) ~ \& ~ bel(then_i,B) \neq tf_i~ \}$
+\end{myquote}
+Although this measure is dependent on the constraints and penalties used,
+it allows us to perform {\it comparative} experiments with different systems.
 
 \begin{table*}
 \centering
 {\small
-\begin{tabular}{|l|ll||ll||ll||ll|} \hline
-Results after seeing: & \multicolumn{2}{|c|}{\bf batch1} &
-\multicolumn{2}{|c|}{then {\bf batch2}} &
-\multicolumn{2}{|c|}{then {\bf batch3}} &
-\multicolumn{2}{|c|}{then {\bf batch4}} \\
-Consistency/Accuracy: & Con & Acc & Con & Acc & Con & Acc & Con & Acc \\ \hline           
-model (raw) & & & & & & & & \\
+\begin{tabular}{|l|ll|ll|ll|ll|} \hline
+Results after seeing $\rightarrow$ & \multicolumn{2}{|c|}{\bf batch1} &
+\multicolumn{2}{|c|}{+ {\bf batch2}} &
+\multicolumn{2}{|c|}{+ {\bf batch3}} &
+\multicolumn{2}{|c|}{+ {\bf batch4} (all)} \\
+Accuracy (F1), Consistency $\rightarrow$ & F1 & Con & F1 & Con & F1 & Con & F1 & Con \\ \hline           
+model (raw) & 48 & 76 & 28 & 79 & 42 & 75 & 44 & 72\\
 model + constraints & & & & & & & & \\
-model + feedback & & & & & & & & \\
-model + constraints + feedback & & & & & & & & \\ \hline
+model + feedback (bm25) & 48 & 76 & 39 & 92 & 48 & 78 & 58 & 86\\
+model + feedback (random) & 48 & 76 & 42 & 94 & 56 & 86 & 56 & 81\\
+model + constraints + feedback (most confident) & & & & & & & & \\
+model + constraints + feedback (relevant for query) & & & & & & & & \\
+model + constraints + feedback (relevant for query + flipped) & & & & & & & & \\\hline
+bm25 with most confident ones?\\
 \end{tabular}
 }
-\caption{{\bf model (raw)} shows the consistency (Con) and accuracy (Acc) of the
-model stand-alone, on each batch of questions. 
+\caption{{\bf model (raw)} shows the accuracy (F1) and consistency (Con) of the
+model stand-alone, after each batch of questions. 
  In {\bf model + constraints}, the constraint solver is run
  after each batch on all the answers seen so far. In {\bf model + feedback},
  questions in batch2 are posed to the model along with selected beliefs from
@@ -377,71 +420,140 @@ model stand-alone, on each batch of questions.
 \label{incremental-improvement}}
 \end{table*}
 
+\subsection{Methods}
 
-\section{Experimental Environment}
+\subsubsection{Constraint Solving}
 
-\subsection{Dataset}
+Given a set of beliefs and constraints, the constraint solver has two competing objectives: (a) flip 
+beliefs so as to minimize constraint penalties (b) don't flip beliefs, so as to preserve
+the model's raw predictions. We balance these two objectives with a hyper-parameter:
+\begin{quote}
+    Equation here
+\end{quote}
 
-We develop and evaluate this idea in a restricted setting in which we have a
-fixed set of propositions, allowing us to perform controlled experiments to evaluate behavior.
+To find the optimal solution to the constraint equations, we convert the problem into a weighted SAT problem,
+and then use the Z3 SAT solver to find the optimal truth assignments to the beliefs. \red{Details are in
+Appendix~\ref{??}}.
 
-Our dataset contains two parts, ``facts'' and ``constraint templates'':
-% Facts are short sentences about an entity, e.g., ``A poodle is a dog.'', where the entity
-% is the subject of the sentence. is the plus an associated truth value T/F,
+\subsubsection{Feedback}
+
+Given a new question $q_i$ and set of beliefs $B$, we augment
+$q_i$ with a {\it context} containing the beliefs most relevant to $q_i$
+before posing it to the model. Our conjecture is that if the 
+model is explicitly reminded of relevant beliefs when answering a new question,
+it will answer the question more accurately and consistently.
+
+We evaluate three policies for chosing which beliefs to feed back to $M$:
+\begin{enu}
+\item[1.] randomly selected from $B$
+\item[2.] most similar, using the BM25 information retrieval ranking function \cite{bm25}
+\item[3.] most confident (``core'') beliefs about the queried entity $e$, ... \red{explain}
+\end{enu}
+In all cases, three beliefs are selected.
+
+\section{Dataset}
+
+We create a dataset to test our approach in a controlled way, allowing us to perform systematic experiments to evaluate behavior.
+
+\subsection{Constraint Templates}
+\nk{I think the terms "constraint templates" and "sentence templates" are confusing. I would call them simply constraint and either sentence/assertion or query. And use the word template for the query template, e.g. Is X a Y?.}
+A {\bf constraint template} $t_i$ is a generalized constraint, namely a 4-tuple of the form
+\begin{myquote} \centering
+($if_i \rightarrow then_i, tf_i, p_i$)
+\end{myquote} 
+where $if_i, then_i$ are sentences containing a single, shared variable ?X, e.g.,
+\begin{myquote} \centering
+\nk{I would prefer simply using X instead of ?X}
+``?X is a dog $\rightarrow$ ?X has a tail.''
+\end{myquote}
+If $if_i$ is true, then $tf_i \in$ \{True,False\} denotes the expected truth of $then_i$, 
+with penalty $p_i$ if it is not.
+
+\noindent
+The dataset contains two kinds of constraints:
 \begin{des}
-\item[{\bf Facts}] are short sentences, e.g., ``A poodle is a dog.'', plus an associated truth value T/F
-denoting their (objective) truth in the world.
-We say the sentence is {\it about} its subject, e.g., ``poodle''.
-\item[{\bf Constraint templates}] are variabilized constaints between beliefs, e.g., ``?X is a dog $\rightarrow$ ?X has a tail.'', plus a penalty $p$ to apply if (a grounded version of) it violated, reflecting the strength of that constraint.
-Constraint templates express potentially useful relationships between beliefs, and
-are used (below) to generate a grounded set of constraints by selecting and instantiating them. Strengths (penalties) are obtained through crowdsourcing, where workers judge if
-the constraint holds always/usually/sometimes/rarely/never with raw scores 4/3/2/1/0, and then the raw scores are calibrated (Section~\ref{calibration}).
+\item[{\bf positive implications:}] ($tf_i$ = True), e.g.,``?X is a dog $\rightarrow$ ?X has a tail.''
+\item[{\bf mutual exclusivity:}] ($tf_i$ = False), e.g.,
+``?X is a dog $\rightarrow$ [$tf$=FALSE] ?X is a bird.'',
+and ``?X is a bird $\rightarrow$ [$tf$=FALSE] ?X is a dog.'', to
+express that an entity cannot be both a dog and a bird at the same time.
+% These are expressed as a pair of constraint templates each with $tf_i$ = False:
+
 \end{des}
+Positive implications were gathered from a filtered subset of ConceptNet triples involving the 6 relations: IsA, HasA, MadeOf, PartOf, HasProperty, CapableOf. For example, the ConceptNet triple (dog, HasA, tail) gives rise to the constraint ``?X is a dog $\rightarrow$ ?X has a tail.''. 
 
-\red{Reword} Constraint templates came from ConceptNet, Facts and their truths come from some seed facts+truths + applying the constraint templates to infer others.
-{\it mention exceptions, i.e., the facts may have noise in them.}.
+Triples were filtered
 
-We only wish to use templates $T$ that the model itself believes. To do this we query the model about
-the template itself, and take its face-value answer as to whether the model believes the template.
-Only the model-believed templates $T$ are then used below.
+by \red{describe filtering method here}.
 
+Mutual exclusivities were gathered from a filtered subset of the WordNet taxonomy,
+based on the approximation that (generally) siblings in the WordNet noun hierarchy
+are mutually exclusive \red{elaborate}.
 
+We collected 13,000 constraint templates in this fashion (3k implications, 10k mutual
+exclusivities).
 
-\subsection{Constraints and Beliefs about an Entity}
+\subsection{Constraint Violation Penalties}
 
-Using the dataset, we can generate both the constraints $C$ and beliefs $B$ about a particular entity $e$ as follows:
-\begin{ite}
-\item The constraints $C$ are the templates $T$ instantiated with ?X = $e$.
-\item The sentences $S$ about $e$ are all those that occur in $C$ (either a condition or a conclusion)
-\item The model's beliefs $B$ in $S$ are its face-value answer to the questions ``Is $s_i$ true?''\footnote{In practice we automatically rephrase this into more natural English, e.g., ``Is a penguin a type of bird?''} for all $s_i \in S$
-\end{ite}
-Thus, given an entity, we can construct $B$ and $C$ for that entity. 
-We perform our experiments using data like this for \red{??} different entities,
-and average the results.
+We used a combination of crowdsourcing and calibration to assign a reasonable
+constraint violation penalty $p_i$ to each constraint. Workers were shown each
+template and asked to judge if the implication held always/usually/sometimes/rarely/never with raw scores 4/3/2/1/0.
+Three workers independently scored each template and the scores averaged.
+The raw scores were then calibrated by sigmoid-scaling \red{against what gold data?}, using a
+grid search over slope and shift to identify the scaling hyper-parameters.
 
-\subsection{Model}
+\subsection{Sentence Templates}
+\nk{I am not sure what this passage is referring to? I have templates for the assertions? You call these assertion sentence, right? I have for each relation a different template. As there are 6 relations I have 6 templates. Why 200?}
+We collect all the unique variabilized sentences in the constraints together,
+resulting in 200 \red{??} sentence templates, e.g., ``?X is a dog.''.
 
-We use UnifiedQA 11B-large (T5 trained on ~400k sentences), with further multi-angle training etc. etc.
-Note it returns a confidence too.
+\subsection{Facts and Constraints}
+\nk{Not sure about this section name. }
+Given the sentence and constraint templates, we can create a {\bf grounded} slice of
+data by instantiating ?X with a particular entity, e.g., ``poodle'' (resulting in 200 
+sentences and 13000 constraints about poodle). To assign True/False labels to the
+sentences, we identify and manually annotate the leaf sentences in the constraint DAG,
+and then use the constraint rules to infer True/False labels for other sentences.
+This provides ``silver'' labels for all the sentences, silver because constraint
+rules may have exceptions in the real world for particular individuals (e.g.,
+penguins don't fly). For a given slice, we denote the sentences as $S$ and
+the constraints about them as $C(S)$.
 
-\subsection{Constraint Solver}
+We repeat this for 120 \red{??} entities (100 animals, 20 plants), resulting
+a final dataset containing {\bf ?? silver facts} (sentences + True/False labels) and {\bf ?? constraints}
+(120 slices $\times$ 200 facts and 1000 constraints).
+Note that each slice is independent and can be processed separately.
+As described shortly, we perform our experiments with each slice in turn
+and average results.
 
-We use Z3 which does weighted SAT, etc.
+\subsection{Dataset Split}
 
-\subsection{Calibration \label{calibration}}
+We randomly split each slice into four batches (batch1, batch2, batch3, batch4) to measure
+improvement with time, shown later.
 
-We calibrate turked scores by sigmoid-scaling. We perform a grid search over slope and shift.
+\section{Model}
+
+The fixd model $M$ that we use for our experiments is the multi-angle QA system MAQAw \cite{arc-da}.
+MAQAw is a derivative of UnifiedQA, a state-of-the-art T5 model fine-tuned on $\approx$400k question-answer pairs.
+MAQAw was then 
+further fine-tuned on several thousand science questions and trained on different permutations of inputs and outputs
+(e.g., question Q + context C $\rightarrow$ answer A; CA $\rightarrow$ Q; etc.). MAQAw outputs an answer probability...
+NOTE this model is fixed for our experiments here.
 
 \section{Experiments}
 
 We present the results of three sets of experiments in this environment:
 \begin{enu}
+\nk{Not sure about the naming here. Let's discuss!}
 \item[{\bf 1. Model:}] How accurate and consistent is the model, a priori?
 \item[{\bf 2. Model + BeliefBank:}] To what extent does adding a BeliefBank memory layer improve the consistency and accuracy
            of the overall system (model + BeliefBank)?
 \item[{\bf 3. Model + BeliefBank + Feedback:}] Can we use the beliefs in the BeliefBank to improve {\it future} answers by the model
 to new (unseen) questions?
 \end{enu}
+
+% Given a set of questions $q1,...,q_n$ about sentences $S$, we can pose them to $M$ and collect both the answers (True/False)
+% and confidences to form the raw model's beliefs $B_{model}(S)$ about $S$.
 
 \subsection{Model}
 
@@ -486,16 +598,20 @@ BeliefBank.
 We evaluate three policies for selecting relevant beliefs for a new question:
 \begin{des}
 \item[(a)] The top 10 beliefs most similar to the question, as identified by BM25 (information retrieval)
+
 \item[(b)] The top 10 {\it corrected} beliefs (i.e., only use beliefs that the model was originally mistaken about)
 \item[(c)] The top 10 {\it positive, corrected} beliefs (i.e., ignore negative ``It is not the case tha...'' beliefs).
-\item[(d)] The top 10 {\it most confident beliefs} independent of if they have been corrected or not.
+
+\item[(d)] The top {\it most confident beliefs} independent of if they have been corrected or not. (running)
+\item[(e)] The top {\it most relevant beliefs} defined by the constraint graph
 \end{des}
 
 Baselines:
 \begin{des}
-\item[(a)] 4 random beliefs of the model without SAT (running)
-\item[(b)] The top 4 beliefs most similar to the question, as identified by BM25 (information retrieval) without SAT (running)
-\item[(c)] 4 random beliefs of the belief bank after SAT.
+\item[(a)] 3 random beliefs of the model without SAT: works better than bm25 as it has more variety in what it adds whereas bm25 if no good match is found add always the same unhelpful context.
+\item[(b)] The top 3 beliefs most similar to the question, as identified by BM25 (information retrieval) without SAT: see (a)
+\item[(c)] 3 random beliefs of the belief bank after SAT.
+\item[(d)] 3 most confident assertions according to the constraints: This works if the relevant queries have been already asked, if not it has the same problem as bm25 as it then adds always the same unfortunate context.
 \end{des}
 % Given the new answer, we run the constraint solver as usual. We are interested in whether
 % an improved model (using one of these policies) + constraint solver will outperform a fixed
