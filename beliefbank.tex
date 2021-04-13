@@ -357,11 +357,11 @@ Figure~\ref{architecture} illustrates this architecture.
 \noindent Let
 \vspace{-2mm}
 \begin{ite}
- \item a {\bf belief} $b_i$ = a triple ($s_i$,$b_i$,$w_i$), where
+ \item a {\bf belief} $b_i$ = a triple ($s_i$,$\textrm{tf}_i$,$w_i$), where
     \begin{ite}
      \item $s_i$ is a sentence $\in S$ % expressing a proposition about the world
      \nk{we should not call the belief and the truth of $s_i$ both $b_i$}
-     \item $b_i \in$ \{T,F\} denotes the system's belief about the truth of $s_i$
+     \item $\textrm{tf}_i \in$ \{T,F\} denotes the system's belief about the truth of $s_i$
      \item $w_i$ is a number $\in [0,1]$ representing the system's confidence in that belief
     \end{ite}
  \item a {\bf BeliefBank} $B(S)$ = a set of beliefs over sentences $S$ = $s_1,...,s_n$
