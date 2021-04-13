@@ -368,14 +368,14 @@ Figure~\ref{architecture} illustrates this architecture.
  \item For notational convenience, we denote the believed truth $b_i$ of $s_i$ according to $B(S)$ as $bel(s_i,B(S))$
  \item a {\bf constraint} $c_i$ = a 4-tuple of the form
 \begin{myquote} \centering
-($\textrm{if}_i \rightarrow then_i, tf_i, p_i$)
+($\textrm{if}_i \rightarrow \textrm{then}_i, tf_i, p_i$)
 \nk{It took me some time to see what is going on here. I think it is comfunsing to call it $\textrm{if}_i$. On first glance it does not read as if but as an index i then f and then again index i...}
 \end{myquote} 
-where $\textrm{if}_i, then_i$ are sentences, e.g., \\
+where $\textrm{if}_i, \textrm{then}_i$ are sentences, e.g., \\
 \vspace{1mm}
 \hspace*{1mm} ``A poodle is a dog'' $\rightarrow$ ``A poodle has a tail'' \\
 \vspace{1mm} 
-and $tf_i \in$ \{True,False\} denotes, if $\textrm{if}_i$ is true, the expected truth of $then_i$ (here, True),
+and $tf_i \in$ \{True,False\} denotes, if $\textrm{if}_i$ is true, the expected truth of $\textrm{then}_i$ (here, True),
 with penalty $p_i$ if it is not.
 \item A {\bf constraint graph} $C(S)$ = a set of constraints $c_i$ over sentences $S$
 \end{ite}
@@ -384,8 +384,8 @@ of those beliefs as (the negative of) the total penalty of violated constraints.
 Dropping the $S$ parameter for convenience:
  \begin{myquote}
   consistency(B,C) = \\
-\hspace*{2mm}  $- \sum_{c_i \in C} \{~ p_i ~ | ~ c_i = (\textrm{if}_i \rightarrow then_i, tf_i, p_i )       ~\& \\
-\hspace*{18mm}  bel(\textrm{if}_i,B) ~ \& ~ bel(then_i,B) \neq tf_i~ \}$
+\hspace*{2mm}  $- \sum_{c_i \in C} \{~ p_i ~ | ~ c_i = (\textrm{if}_i \rightarrow \textrm{then}_i, tf_i, p_i )       ~\& \\
+\hspace*{18mm}  bel(\textrm{if}_i,B) ~ \& ~ bel(\textrm{then}_i,B) \neq tf_i~ \}$
 \end{myquote}
 Although this measure is dependent on the constraints and penalties used,
 it allows us to perform {\it comparative} experiments with different systems.
@@ -459,14 +459,14 @@ We create a dataset to test our approach in a controlled way, allowing us to per
 \nk{I think the terms "constraint templates" and "sentence templates" are confusing. I would call them simply constraint and either sentence/assertion or query. And use the word template for the query template, e.g. Is X a Y?.}
 A {\bf constraint template} $t_i$ is a generalized constraint, namely a 4-tuple of the form
 \begin{myquote} \centering
-($\textrm{if}_i \rightarrow then_i, tf_i, p_i$)
+($\textrm{if}_i \rightarrow \textrm{then}_i, tf_i, p_i$)
 \end{myquote} 
-where $\textrm{if}_i, then_i$ are sentences containing a single, shared variable ?X, e.g.,
+where $\textrm{if}_i, \textrm{then}_i$ are sentences containing a single, shared variable ?X, e.g.,
 \begin{myquote} \centering
 \nk{I would prefer simply using X instead of ?X}
 ``?X is a dog $\rightarrow$ ?X has a tail.''
 \end{myquote}
-If $\textrm{if}_i$ is true, then $tf_i \in$ \{True,False\} denotes the expected truth of $then_i$, 
+If $\textrm{if}_i$ is true, \textrm{then} $tf_i \in$ \{True,False\} denotes the expected truth of $\textrm{then}_i$, 
 with penalty $p_i$ if it is not.
 
 \noindent
