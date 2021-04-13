@@ -357,25 +357,25 @@ Figure~\ref{architecture} illustrates this architecture.
 \noindent Let
 \vspace{-2mm}
 \begin{ite}
- \item a {\bf belief} $b_i$ = a triple ($s_i$,$b_i$,$c_i$), where
+ \item a {\bf belief} $b_i$ = a triple ($s_i$,$b_i$,$w_i$), where
     \begin{ite}
      \item $s_i$ is a sentence $\in S$ % expressing a proposition about the world
      \nk{we should not call the belief and the truth of $s_i$ both $b_i$}
      \item $b_i \in$ \{T,F\} denotes the system's belief about the truth of $s_i$
-     \item $w_i$ is a number 0-1 representing the system's confidence in that belief
+     \item $w_i$ is a number $\in [0,1]$ representing the system's confidence in that belief
     \end{ite}
  \item a {\bf BeliefBank} $B(S)$ = a set of beliefs over sentences $S$ = $s_1,...,s_n$
  \item For notational convenience, we denote the believed truth $b_i$ of $s_i$ according to $B(S)$ as $bel(s_i,B(S))$
  \item a {\bf constraint} $c_i$ = a 4-tuple of the form
 \begin{myquote} \centering
-($\textrm{if}_i \rightarrow \textrm{then}_i, tf_i, p_i$)
+($\textrm{if}_i \rightarrow \textrm{then}_i, \textrm{tf}_i, p_i$)
 \nk{It took me some time to see what is going on here. I think it is comfunsing to call it $\textrm{if}_i$. On first glance it does not read as if but as an index i then f and then again index i...}
 \end{myquote} 
 where $\textrm{if}_i, \textrm{then}_i$ are sentences, e.g., \\
 \vspace{1mm}
 \hspace*{1mm} ``A poodle is a dog'' $\rightarrow$ ``A poodle has a tail'' \\
 \vspace{1mm} 
-and $tf_i \in$ \{True,False\} denotes, if $\textrm{if}_i$ is true, the expected truth of $\textrm{then}_i$ (here, True),
+and $\textrm{tf}_i \in$ \{True,False\} denotes, if $\textrm{if}_i$ is true, the expected truth of $\textrm{then}_i$ (here, True),
 with penalty $p_i$ if it is not.
 \item A {\bf constraint graph} $C(S)$ = a set of constraints $c_i$ over sentences $S$
 \end{ite}
@@ -384,8 +384,8 @@ of those beliefs as (the negative of) the total penalty of violated constraints.
 Dropping the $S$ parameter for convenience:
  \begin{myquote}
   consistency(B,C) = \\
-\hspace*{2mm}  $- \sum_{c_i \in C} \{~ p_i ~ | ~ c_i = (\textrm{if}_i \rightarrow \textrm{then}_i, tf_i, p_i )       ~\& \\
-\hspace*{18mm}  bel(\textrm{if}_i,B) ~ \& ~ bel(\textrm{then}_i,B) \neq tf_i~ \}$
+\hspace*{2mm}  $- \sum_{c_i \in C} \{~ p_i ~ | ~ c_i = (\textrm{if}_i \rightarrow \textrm{then}_i, \textrm{tf}_i, p_i )       ~\& \\
+\hspace*{18mm}  bel(\textrm{if}_i,B) ~ \& ~ bel(\textrm{then}_i,B) \neq \textrm{tf}_i~ \}$
 \end{myquote}
 Although this measure is dependent on the constraints and penalties used,
 it allows us to perform {\it comparative} experiments with different systems.
@@ -459,25 +459,25 @@ We create a dataset to test our approach in a controlled way, allowing us to per
 \nk{I think the terms "constraint templates" and "sentence templates" are confusing. I would call them simply constraint and either sentence/assertion or query. And use the word template for the query template, e.g. Is X a Y?.}
 A {\bf constraint template} $t_i$ is a generalized constraint, namely a 4-tuple of the form
 \begin{myquote} \centering
-($\textrm{if}_i \rightarrow \textrm{then}_i, tf_i, p_i$)
+($\textrm{if}_i \rightarrow \textrm{then}_i, \textrm{tf}_i, p_i$)
 \end{myquote} 
 where $\textrm{if}_i, \textrm{then}_i$ are sentences containing a single, shared variable ?X, e.g.,
 \begin{myquote} \centering
 \nk{I would prefer simply using X instead of ?X}
 ``?X is a dog $\rightarrow$ ?X has a tail.''
 \end{myquote}
-If $\textrm{if}_i$ is true, \textrm{then} $tf_i \in$ \{True,False\} denotes the expected truth of $\textrm{then}_i$, 
+If $\textrm{if}_i$ is true, \textrm{then} $\textrm{tf}_i \in$ \{True,False\} denotes the expected truth of $\textrm{then}_i$, 
 with penalty $p_i$ if it is not.
 
 \noindent
 The dataset contains two kinds of constraints:
 \begin{des}
-\item[{\bf positive implications:}] ($tf_i$ = True), e.g.,``?X is a dog $\rightarrow$ ?X has a tail.''
-\item[{\bf mutual exclusivity:}] ($tf_i$ = False), e.g.,
-``?X is a dog $\rightarrow$ [$tf$=FALSE] ?X is a bird.'',
-and ``?X is a bird $\rightarrow$ [$tf$=FALSE] ?X is a dog.'', to
+\item[{\bf positive implications:}] ($\textrm{tf}_i$ = True), e.g.,``?X is a dog $\rightarrow$ ?X has a tail.''
+\item[{\bf mutual exclusivity:}] ($\textrm{tf}_i$ = False), e.g.,
+``?X is a dog $\rightarrow$ [$\textrm{tf}$=FALSE] ?X is a bird.'',
+and ``?X is a bird $\rightarrow$ [$\textrm{tf}$=FALSE] ?X is a dog.'', to
 express that an entity cannot be both a dog and a bird at the same time.
-% These are expressed as a pair of constraint templates each with $tf_i$ = False:
+% These are expressed as a pair of constraint templates each with $\textrm{tf}_i$ = False:
 
 \end{des}
 Positive implications were gathered from a filtered subset of ConceptNet triples involving the 6 relations: IsA, HasA, MadeOf, PartOf, HasProperty, CapableOf. For example, the ConceptNet triple (dog, HasA, tail) gives rise to the constraint ``?X is a dog $\rightarrow$ ?X has a tail.''. We only consider English triplets with weights larger than 1.0. To gather these triplets we er 
