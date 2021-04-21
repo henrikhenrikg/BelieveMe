@@ -43,31 +43,6 @@
     pages = "4902--4912",
 }
 
-@inproceedings{li-etal-2019-logic,
-    title = "A Logic-Driven Framework for Consistency of Neural Models",
-    author = "Li, Tao  and
-      Gupta, Vivek  and
-      Mehta, Maitrey  and
-      Srikumar, Vivek",
-    booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)",
-    month = nov,
-    year = "2019",
-    address = "Hong Kong, China",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/D19-1405",
-    doi = "10.18653/v1/D19-1405",
-    pages = "3924--3935",
-    abstract = "While neural models show remarkable accuracy on individual predictions, their internal beliefs can be inconsistent across examples. In this paper, we formalize such inconsistency as a generalization of prediction error. We propose a learning framework for constraining models using logic rules to regularize them away from inconsistency. Our framework can leverage both labeled and unlabeled examples and is directly compatible with off-the-shelf learning schemes without model redesign. We instantiate our framework on natural language inference, where experiments show that enforcing invariants stated in logic can help make the predictions of neural models both accurate and consistent.",
-}
-
-@inproceedings{du2019consistent,
-  title={Be Consistent! Improving Procedural Text Comprehension using Label Consistency},
-  author={Du, Xinya and Dalvi, Bhavana and Tandon, Niket and Bosselut, Antoine and Yih, Wen-tau and Clark, Peter and Cardie, Claire},
-  booktitle={Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)},
-  pages={2347--2356},
-  year={2019}
-}
-
 @article{Mishra2017DomainTargetedHP,
   title={Domain-Targeted, High Precision Knowledge Extraction},
   author={B. D. Mishra and Niket Tandon and P. Clark},
@@ -79,14 +54,9 @@
 
 @inproceedings{Thimm:2009d,
 	Author = {Matthias Thimm},
-	Booktitle = {Proceedings of the Twenty-Fifth Conference on Uncertainty in Artificial Intelligence (UAI'09)},
-	Editor = {Jeff Bilmes and Andrew Ng},
-	Month = {June},
-	Pages = {530--537},
-	Location = {Montreal, Canada},
-	Publisher = {AUAI Press},
-	Title = {{Measuring Inconsistency in Probabilistic Knowledge Bases}},
-	Year = {2009}
+	Booktitle = {UAI},
+	Year={2009},
+	Title = {Measuring Inconsistency in Probabilistic Knowledge Bases}
 }
 @inproceedings{Pujara2013KnowledgeGI,
   title={Knowledge Graph Identification},
@@ -138,6 +108,31 @@
   volume={abs/2010.06973}
 }
 
+@inproceedings{Subramanian2020ObtainingFI,
+  title={Obtaining Faithful Interpretations from Compositional Neural Networks},
+  author={Sanjay Subramanian and Ben Bogin and Nitish Gupta and Tomer Wolfson and Sameer Singh and Jonathan Berant and Matt Gardner},
+  booktitle={ACL},
+  year={2020}
+}
+
+@inproceedings{shwartz-etal-2020-unsupervised,
+    title = "Unsupervised Commonsense Question Answering with Self-Talk",
+    author = "Shwartz, Vered  and
+      West, Peter  and
+      Le Bras, Ronan  and
+      Bhagavatula, Chandra  and
+      Choi, Yejin",
+    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2020.emnlp-main.373",
+    doi = "10.18653/v1/2020.emnlp-main.373",
+    pages = "4615--4629",
+    abstract = "Natural language understanding involves reading between the lines with implicit background knowledge. Current systems either rely on pre-trained language models as the sole implicit source of world knowledge, or resort to external knowledge bases (KBs) to incorporate additional relevant knowledge. We propose an unsupervised framework based on self-talk as a novel alternative to multiple-choice commonsense tasks. Inspired by inquiry-based discovery learning (Bruner, 1961), our approach inquires language models with a number of information seeking questions such as {``}what is the definition of...{''} to discover additional background knowledge. Empirical results demonstrate that the self-talk procedure substantially improves the performance of zero-shot language model baselines on four out of six commonsense benchmarks, and competes with models that obtain knowledge from external KBs. While our approach improves performance on several benchmarks, the self-talk induced knowledge even when leading to correct answers is not always seen as helpful by human judges, raising interesting questions about the inner-workings of pre-trained language models for commonsense reasoning.",
+}
+
 @inproceedings{kassner-etal-2020-pretrained,
     title = "Are Pretrained Language Models Symbolic Reasoners over Knowledge?",
     author = {Kassner, Nora  and
@@ -159,15 +154,8 @@
     author = "Roberts, Adam  and
       Raffel, Colin  and
       Shazeer, Noam",
-    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
-    month = nov,
-    year = "2020",
-    address = "Online",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/2020.emnlp-main.437",
-    doi = "10.18653/v1/2020.emnlp-main.437",
-    pages = "5418--5426",
-    abstract = "It has recently been observed that neural language models trained on unstructured text can implicitly store and retrieve knowledge using natural language queries. In this short paper, we measure the practical utility of this approach by fine-tuning pre-trained models to answer questions without access to any external context or knowledge. We show that this approach scales with model size and performs competitively with open-domain systems that explicitly retrieve answers from an external knowledge source when answering questions. To facilitate reproducibility and future work, we release our code and trained models.",
+    booktitle = {EMNLP},
+    year = "2020"
 }
 
 @article{Talmor2020TeachingPM,
@@ -187,7 +175,7 @@
 }
 
 @inproceedings{Camburu2020MakeUY,
-  title={Make Up Your Mind! Adversarial Generation of Inconsistent Natural Language Explanations},
+  title={Make Up Your Mind! {A}dversarial Generation of Inconsistent Natural Language Explanations},
   author={Oana-Maria Camburu and Brendan Shillingford and Pasquale Minervini and Thomas Lukasiewicz and P. Blunsom},
   booktitle={ACL},
   year={2020}
@@ -200,14 +188,8 @@
       Suleman, Kaheer  and
       Trischler, Adam  and
       Cheung, Jackie Chi Kit",
-    booktitle = "Proceedings of the Ninth Joint Conference on Lexical and Computational Semantics",
-    month = dec,
-    year = "2020",
-    address = "Barcelona, Spain (Online)",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/2020.starsem-1.10",
-    pages = "88--102",
-    abstract = "Contextualized word representations have become a driving force in NLP, motivating widespread interest in understanding their capabilities and the mechanisms by which they operate. Particularly intriguing is their ability to identify and encode conceptual abstractions. Past work has probed BERT representations for this competence, finding that BERT can correctly retrieve noun hypernyms in cloze tasks. In this work, we ask the question: \textit{do probing studies shed light on systematic knowledge in BERT representations?} As a case study, we examine hypernymy knowledge encoded in BERT representations. In particular, we demonstrate through a simple consistency probe that the ability to correctly retrieve hypernyms in cloze tasks, as used in prior work, does not correspond to systematic knowledge in BERT. Our main conclusion is cautionary: even if BERT demonstrates high probing accuracy for a particular competence, it does not necessarily follow that BERT {`}understands{'} a concept, and it cannot be expected to systematically generalize across applicable contexts.",
+    booktitle = {STARSEM},
+    year = "2020"
 }
 
 @incollection{wordnet,
@@ -251,7 +233,7 @@
 
 
 @inproceedings{Minervini2018AdversariallyRN,
-  title={Adversarially Regularising Neural NLI Models to Integrate Logical Background Knowledge},
+  title={Adversarially Regularising Neural {NLI} Models to Integrate Logical Background Knowledge},
   author={Pasquale Minervini and S. Riedel},
   booktitle={CoNLL},
   year={2018}
@@ -265,7 +247,7 @@
 }
 
 @inproceedings{Ribeiro2019AreRR,
-  title={Are Red Roses Red? Evaluating Consistency of Question-Answering Models},
+  title={Are Red Roses Red? {E}valuating Consistency of Question-Answering Models},
   author={Marco Tulio Ribeiro and Carlos Guestrin and Sameer Singh},
   booktitle={ACL},
   year={2019}
@@ -273,14 +255,14 @@
 
 @inproceedings{Tandon2018ReasoningAA,
   title={Reasoning about Actions and State Changes by Injecting Commonsense Knowledge},
-  author={Niket Tandon and Bhavana Dalvi and Joel Grus and Wen-tau Yih and Antoine Bosselut and Peter Clark},
+  author={Niket Tandon and Bhavana Dalvi and Joel Grus and Wen{-}tau Yih and Antoine Bosselut and Peter Clark},
   booktitle={EMNLP},
   year={2018}
 }
 
 @inproceedings{Du2019BeCI,
-  title={Be Consistent! Improving Procedural Text Comprehension using Label Consistency},
-  author={X. Du and Bhavana Dalvi Mishra and Niket Tandon and Antoine Bosselut and Wen-tau Yih and P. Clark and Claire Cardie},
+  title={Be Consistent! {I}mproving Procedural Text Comprehension using Label Consistency},
+  author={X. Du and Bhavana Dalvi Mishra and Niket Tandon and Antoine Bosselut and Wen{-}tau Yih and P. Clark and Claire Cardie},
   booktitle={NAACL},
   year={2019}
 }
@@ -316,8 +298,6 @@
     journal = "Transactions of the Association for Computational Linguistics",
     volume = "8",
     year = "2020",
-    url = "https://www.aclweb.org/anthology/2020.tacl-1.3",
-    doi = "10.1162/tacl_a_00298",
     pages = "34--48",
     abstract = "Pre-training by language modeling has become a popular and successful approach to NLP tasks, but we have yet to understand exactly what linguistic capacities these pre-training processes confer upon models. In this paper we introduce a suite of diagnostics drawn from human language experiments, which allow us to ask targeted questions about information used by language models for generating predictions in context. As a case study, we apply these diagnostics to the popular BERT model, finding that it can generally distinguish good from bad completions involving shared category or role reversal, albeit with less sensitivity than humans, and it robustly retrieves noun hypernyms, but it struggles with challenging inference and role-based event prediction{---} and, in particular, it shows clear insensitivity to the contextual impacts of negation.",
 }
@@ -346,12 +326,12 @@
 @inproceedings{Sukhbaatar2015EndToEndMN,
   title={End-To-End Memory Networks},
   author={Sainbayar Sukhbaatar and Arthur D. Szlam and J. Weston and R. Fergus},
-  booktitle={NIPS},
+  booktitle={NeurIPS},
   year={2015}
 }
 
 @article{arc-da,
-  title={Think you have Solved Direct-Answer Question Answering? Try ARC-DA, the Direct-Answer AI2 Reasoning Challenge},
+  title={Think you have Solved Direct-Answer Question Answering? {T}ry {ARC-DA}, the Direct-Answer {AI2} Reasoning Challenge},
   author={Sumithra Bhakthavatsalam and Daniel Khashabi and Tushar Khot and B. D. Mishra and Kyle Richardson and Ashish Sabharwal and Carissa Schoenick and Oyvind Tafjord and P. Clark},
   journal={ArXiv},
   year={2021},
@@ -367,7 +347,7 @@
 
 @inproceedings{Kassner2020NegatedAM,
   title={Negated and Misprimed Probes for Pretrained Language Models: Birds Can Talk, But Cannot Fly},
-  author={Nora Kassner and H. Schutze},
+  author={Nora Kassner and H. Sch{\"u}tze},
   booktitle={ACL},
   year={2020}
 }
@@ -378,6 +358,15 @@
   journal={ArXiv},
   year={2021},
   volume={abs/2102.01017}
+}
+
+@inproceedings{davison-etal-2019-commonsense,
+    title = "Commonsense Knowledge Mining from Pretrained Models",
+    author = "Davison, Joe  and
+      Feldman, Joshua  and
+      Rush, Alexander",
+    year = "2019",
+    booktitle={EMNLP}
 }
 
 @inproceedings{Seo2017BidirectionalAF,
@@ -391,4 +380,27 @@
   title={Mental Models : Towards a Cognitive Science of Language},
   author={P. Johnson-Laird},
   year={1983}
+}
+
+@inproceedings{unifiedqa,
+  title={Unified{QA}: Crossing Format Boundaries With a Single {QA} System},
+  author={Daniel Khashabi and Sewon Min and Tushar Khot and Ashish Sabharwal and Oyvind Tafjord and P. Clark and Hannaneh Hajishirzi},
+  booktitle={EMNLP},
+  year={2020}
+}
+
+@inproceedings{selftalk,
+  title={Unsupervised Commonsense Question Answering with Self-Talk},
+  author={Vered Shwartz and Peter West and Ronan Le Bras and Chandra Bhagavatula and Yejin Choi},
+  booktitle={EMNLP},
+  year={2020}
+}
+
+@inproceedings{z3,
+  title={Z3: An efficient {SMT} solver},
+  author={De Moura, Leonardo and Bj{\o}rner, Nikolaj},
+  booktitle={International conference on Tools and Algorithms for the Construction and Analysis of Systems},
+  pages={337--340},
+  year={2008},
+  organization={Springer}
 }
